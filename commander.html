@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulaire de Commande - Al-Afna Business</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="commander.css">
+
+</head>
+<body>
+    <div class="top-banner">
+        <i class="fas fa-truck"></i> Livraison GRATUITE à Niamey dès 20 000 FCFA ! 🎉
+    </div>
+
+    <nav>
+        <div class="container">
+            <div class="logo">
+                <i class="fas fa-print"></i>
+                Al-Afna Business
+            </div>
+            <button class="menu-toggle" onclick="toggleMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <ul id="menu">
+                <li><a href="index.html" onclick="closeMenu()">Accueil</a></li>
+                <li><a href="boutique.html" onclick="closeMenu()">Boutique</a></li>
+                <li><a href="panier.html" onclick="closeMenu()"><i class="fas fa-shopping-cart"></i> Panier</a></li>
+                <li><a href="admin.html" onclick="closeMenu()"><i class="fas fa-lock"></i> Admin</a></li>
+                <li><a href="index.html#contact" onclick="closeMenu()">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="commander-header">
+        <h1><i class="fas fa-clipboard-list"></i> Finaliser ma Commande</h1>
+        <p>Complétez vos informations pour valider votre commande</p>
+    </div>
+
+    <div class="commander-container">
+        <div class="commander-content">
+            <div class="commander-form">
+                <div class="success-message" id="successMessage">
+                    <i class="fas fa-check-circle"></i>
+                    <strong>✅ Commande envoyée avec succès!</strong>
+                    <p>Nous avons reçu votre commande. Vous recevrez une confirmation par WhatsApp et Email.</p>
+                </div>
+
+                <form id="commandeForm" onsubmit="handleSubmit(event)">
+                    <!-- INFORMATIONS PERSONNELLES -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-user"></i> Informations Personnelles</h3>
+                        <div class="form-grid">
+                            <div class="form-group required">
+                                <label>Nom Complet</label>
+                                <input type="text" id="fullName" required>
+                            </div>
+                            <div class="form-group required">
+                                <label>Email</label>
+                                <input type="email" id="email" required>
+                            </div>
+                            <div class="form-group required">
+                                <label>Téléphone (WhatsApp)</label>
+                                <input type="tel" id="phone" placeholder="+227 XX XX XX XX" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ADRESSE DE LIVRAISON -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-map-marker-alt"></i> Adresse de Livraison</h3>
+                        <div class="form-grid">
+                            <div class="form-group required" style="grid-column: 1 / -1;">
+                                <label>Rue / Quartier</label>
+                                <input type="text" id="address" required>
+                            </div>
+                            <div class="form-group required">
+                                <label>Ville</label>
+                                <select id="city" required>
+                                    <option value="">Choisir</option>
+                                    <option value="Niamey">Niamey</option>
+                                    <option value="Maradi">Maradi</option>
+                                    <option value="Zinder">Zinder</option>
+                                    <option value="Dosso">Dosso</option>
+                                    <option value="Tahoua">Tahoua</option>
+                                    <option value="Diffa">Diffa</option>
+                                    <option value="Agadez">Agadez</option>
+                                    <option value="Tillabéri">Tillabéri</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Notes de Livraison (optionnel)</label>
+                                <textarea id="deliveryNotes" placeholder="Ex: Laisser à la porte, livrer après 18h..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MODE DE PAIEMENT -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-credit-card"></i> Mode de Paiement</h3>
+                        <div class="payment-methods">
+                            <label class="payment-option">
+                                <input type="radio" name="payment" value="cash" checked onchange="updatePayment('cash')">
+                                <label style="cursor: pointer; margin: 0;">
+                                    <i class="fas fa-money-bill"></i><br>
+                                    Paiement à la Livraison
+                                </label>
+                            </label>
+                            <label class="payment-option">
+                                <input type="radio" name="payment" value="transfer" onchange="updatePayment('transfer')">
+                                <label style="cursor: pointer; margin: 0;">
+                                    <i class="fas fa-mobile-alt"></i><br>
+                                    Virement Mobile Money
+                                </label>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- COMMENTAIRES -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-comment"></i> Commentaires (optionnel)</h3>
+                        <div class="form-group">
+                            <textarea id="comments" placeholder="Ajoutez des commentaires ou demandes spéciales..."></textarea>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        <i class="fas fa-check"></i> Valider et Envoyer ma Commande
+                    </button>
+                </form>
+            </div>
+
+            <!-- RÉSUMÉ COMMANDE -->
+            <div class="commander-summary">
+                <div class="summary-title">
+                    <i class="fas fa-receipt"></i> Résumé Commande
+                </div>
+                <div class="order-items" id="orderItems">
+                    <!-- Les articles seront affichés ici -->
+                </div>
+                <div class="summary-row">
+                    <span>Sous-total</span>
+                    <span id="summarySubtotal">0 FCFA</span>
+                </div>
+                <div class="summary-row">
+                    <span>Livraison</span>
+                    <span id="summaryShipping">Gratuite</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total</span>
+                    <span id="summaryTotal">0 FCFA</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 <span class="footer-gold">Al-Afna Business</span> - Tous droits réservés</p>
+        <p>Sublimation Professionnelle de Qualité</p>
+    </footer>
+
+    <script src="products.js"></script>
+    <script src="shop.js"></script>
+    
+    <script>
+        // Configuration WhatsApp et Email
+        const WHATSAPP_NUMBER = '22793627145'; // Remplacez par votre numéro WhatsApp
+        const ADMIN_EMAIL = 'contactalafna@gmail.com'; // Remplacez par votre email
+        const ADMIN_NAME = 'Al-Afna Business';
+        const SHIPPING_FEE = 1000; // frais de livraison fixes en FCFA
+
+        function displayOrderSummary() {
+            const cart = getCart();
+            const orderItemsDiv = document.getElementById('orderItems');
+            
+            if (cart.length === 0) {
+                window.location.href = 'panier.html';
+                return;
+            }
+
+            // Afficher les articles
+            orderItemsDiv.innerHTML = cart.map(item => `
+                <div class="order-item">
+                    <div class="order-item-name">${item.name}</div>
+                    <div class="order-item-details">
+                        Couleur: ${item.color} | Qty: ${item.quantity} | ${(item.price * item.quantity).toLocaleString()} FCFA
+                    </div>
+                </div>
+            `).join('');
+
+            // Calculer et afficher les totaux
+            updateOrderTotals();
+        }
+
+        function updateOrderTotals() {
+            const subtotal = getCartTotal();
+            const shipping = SHIPPING_FEE;
+            const total = subtotal + shipping;
+
+            // Mettre à jour l'affichage
+            document.getElementById('summarySubtotal').textContent = subtotal.toLocaleString() + ' FCFA';
+            document.getElementById('summaryShipping').textContent = shipping.toLocaleString() + ' FCFA';
+            document.getElementById('summaryTotal').textContent = total.toLocaleString() + ' FCFA';
+        }
+
+        // Observer pour mettre à jour en temps réel si le panier change
+        setInterval(() => {
+            updateOrderTotals();
+        }, 500);
+
+        function updatePayment(method) {
+            const options = document.querySelectorAll('.payment-option');
+            options.forEach(opt => opt.classList.remove('selected'));
+            const el = (typeof event !== 'undefined' && event.target) ? event.target : window.event && window.event.target;
+            if (el) {
+                const opt = el.closest('.payment-option');
+                if (opt) opt.classList.add('selected');
+            }
+        }
+
+        function handleSubmit(e) {
+            e.preventDefault();
+
+            const cart = getCart();
+            if (cart.length === 0) {
+                alert('Votre panier est vide');
+                window.location.href = 'panier.html';
+                return;
+            }
+
+            // Récupérer les données du formulaire
+            const fullName = document.getElementById('fullName').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const address = document.getElementById('address').value;
+            const city = document.getElementById('city').value;
+            const deliveryNotes = document.getElementById('deliveryNotes').value;
+            const payment = document.querySelector('input[name="payment"]:checked').value;
+            const comments = document.getElementById('comments').value;
+            
+            // Calculer les totaux
+            const subtotal = getCartTotal();
+            const shipping = SHIPPING_FEE;
+            const total = subtotal + shipping;
+
+            // Créer le message
+            const orderDetails = cart.map(item => 
+                `• ${item.name} (${item.color}) x${item.quantity} = ${(item.price * item.quantity).toLocaleString()} FCFA`
+            ).join('\n');
+
+            const message = `🛍️ *NOUVELLE COMMANDE*\n\n` +
+                `*Client:* ${fullName}\n` +
+                `*Email:* ${email}\n` +
+                `*Téléphone:* ${phone}\n\n` +
+                `*📍 Adresse de Livraison:*\n` +
+                `${address}\n` +
+                `${city}\n` +
+                `${deliveryNotes ? `Notes: ${deliveryNotes}\n` : ''}\n` +
+                `*📦 Articles:*\n` +
+                `${orderDetails}\n\n` +
+                `*🔢 Sous-total:* ${subtotal.toLocaleString()} FCFA\n` +
+                `*🚚 Livraison:* ${shipping.toLocaleString()} FCFA\n` +
+                `*💰 Total:* ${total.toLocaleString()} FCFA\n` +
+                `*💳 Mode de paiement:* ${payment === 'cash' ? 'Paiement à la livraison' : 'Virement Mobile Money'}\n` +
+                `${comments ? `\n*Commentaires:* ${comments}` : ''}`;
+
+            // Envoyer via WhatsApp
+            sendViaWhatsApp(message);
+
+            // Envoyer par Email
+            sendViaEmail(fullName, email, phone, address, city, deliveryNotes, payment, comments, orderDetails, subtotal, shipping, total);
+
+            // Afficher le message de succès
+            document.getElementById('commandeForm').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'block';
+
+            // Vider le panier et rediriger après 3 secondes
+            setTimeout(() => {
+                clearCart();
+                window.location.href = 'index.html';
+            }, 3000);
+        }
+
+        function sendViaWhatsApp(message) {
+            const adminNumber = WHATSAPP_NUMBER.replace(/\D/g, '');
+            const whatsappUrl = `https://wa.me/${adminNumber}?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        function sendViaEmail(fullName, email, phone, address, city, deliveryNotes, payment, comments, orderDetails, subtotal, shipping, total) {
+            sendEmailToAdmin(fullName, email, phone, address, city, deliveryNotes, payment, comments, orderDetails, subtotal, shipping, total);
+            sendEmailToClient(fullName, email, orderDetails, subtotal, shipping, total, payment);
+        }
+
+        function sendEmailToAdmin(fullName, email, phone, address, city, deliveryNotes, payment, comments, orderDetails, subtotal, shipping, total) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = 'https://formsubmit.co/ajax/' + ADMIN_EMAIL;
+            form.style.display = 'none';
+
+            const fields = {
+                'Client': fullName,
+                'Email Client': email,
+                'Téléphone': phone,
+                'Adresse': address,
+                'Ville': city,
+                'Notes de Livraison': deliveryNotes || 'Aucune',
+                'Mode de Paiement': payment === 'cash' ? 'Paiement à la livraison' : 'Virement Mobile Money',
+                'Articles': orderDetails,
+                'Sous-total': subtotal.toLocaleString() + ' FCFA',
+                'Livraison': shipping.toLocaleString() + ' FCFA',
+                'Total': total.toLocaleString() + ' FCFA',
+                'Commentaires': comments || 'Aucun',
+                '_captcha': 'false',
+                '_subject': `🛍️ NOUVELLE COMMANDE - ${fullName}`,
+                '_cc': email
+            };
+
+            for (let key in fields) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = fields[key];
+                form.appendChild(input);
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+        }
+
+        function sendEmailToClient(fullName, email, orderDetails, subtotal, shipping, total, payment) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = 'https://formsubmit.co/ajax/' + email;
+            form.style.display = 'none';
+
+            const paymentText = payment === 'cash' 
+                ? '💵 Paiement à la livraison' 
+                : '📱 Virement Mobile Money';
+
+            const fields = {
+                'Merci pour votre commande': `Bonjour ${fullName},`,
+                'Détails Articles': orderDetails,
+                'Sous-total': subtotal.toLocaleString() + ' FCFA',
+                'Frais Livraison': shipping.toLocaleString() + ' FCFA',
+                'Montant Total': total.toLocaleString() + ' FCFA',
+                'Mode de Paiement': paymentText,
+                'Message': 'Votre commande a été reçue. Vous la recevrez dans les 24-72h à Niamey. Merci pour votre confiance !',
+                '_captcha': 'false',
+                '_subject': `✅ Confirmation de Commande - Al-Afna Business`,
+                '_from_name': 'Al-Afna Business'
+            };
+
+            for (let key in fields) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = fields[key];
+                form.appendChild(input);
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+        }
+
+        // Initialiser à la charge de la page
+        displayOrderSummary();
+    </script>
+</body>
+</html>

@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panier - Al-Afna Business</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .panier-header {
+            background: linear-gradient(135deg, var(--dark) 0%, #2a2a2a 100%);
+            color: #fff;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .panier-header h1 {
+            color: var(--gold);
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .panier-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .panier-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+        }
+
+        .panier-items {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+
+        .panier-empty {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .panier-empty i {
+            font-size: 80px;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+
+        .panier-empty h3 {
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+
+        .panier-empty p {
+            color: #999;
+        }
+
+        .panier-item {
+            display: grid;
+            grid-template-columns: 100px 1fr auto auto;
+            gap: 20px;
+            align-items: center;
+            padding: 20px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .panier-item-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .panier-item-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .panier-item-details {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .panier-item-name {
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 16px;
+        }
+
+        .panier-item-color {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .qty-control {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .qty-control button {
+            width: 30px;
+            height: 30px;
+            border: 1px solid var(--border);
+            background: #fff;
+            cursor: pointer;
+            border-radius: 3px;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+
+        .qty-control button:hover {
+            background: var(--light);
+            border-color: var(--gold);
+        }
+
+        .qty-control input {
+            width: 40px;
+            text-align: center;
+            border: 1px solid var(--border);
+            padding: 5px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+
+        .panier-item-price {
+            font-weight: 700;
+            color: var(--gold);
+            min-width: 100px;
+            text-align: right;
+            font-size: 18px;
+        }
+
+        .panier-item-remove {
+            background: #e74c3c;
+            color: #fff;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .panier-item-remove:hover {
+            background: #c0392b;
+        }
+
+        .panier-summary {
+            background: #fff;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            height: fit-content;
+            position: sticky;
+            top: 120px;
+        }
+
+        .summary-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .summary-row.total {
+            border: none;
+            padding-top: 15px;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .summary-row label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .summary-row span {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--gold) 0%, #c9a63d 100%);
+            color: var(--dark);
+            border: none;
+            border-radius: 5px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .checkout-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .continue-shopping {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .continue-shopping a {
+            color: var(--gold);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .panier-container {
+                padding: 30px 15px;
+            }
+
+            .panier-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .panier-summary {
+                position: static;
+                top: auto;
+            }
+
+            .panier-item {
+                grid-template-columns: 80px 1fr;
+                gap: 15px;
+            }
+
+            .panier-item-price,
+            .panier-item-remove {
+                grid-column: 1 / -1;
+                justify-self: flex-end;
+            }
+
+            .panier-items {
+                padding: 20px;
+            }
+
+            .panier-item {
+                padding: 15px;
+            }
+
+            .qty-control {
+                margin-top: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .panier-header {
+                padding: 40px 20px;
+            }
+
+            .panier-header h1 {
+                font-size: 26px;
+            }
+
+            .panier-items {
+                padding: 15px;
+            }
+
+            .panier-item {
+                grid-template-columns: 70px 1fr;
+                gap: 12px;
+                padding: 12px;
+                margin-bottom: 12px;
+            }
+
+            .panier-item-image {
+                width: 70px;
+                height: 70px;
+            }
+
+            .panier-item-name {
+                font-size: 14px;
+            }
+
+            .panier-item-color {
+                font-size: 12px;
+            }
+
+            .qty-control button {
+                width: 28px;
+                height: 28px;
+                font-size: 13px;
+            }
+
+            .qty-control input {
+                width: 35px;
+                font-size: 12px;
+            }
+
+            .panier-item-price {
+                font-size: 16px;
+            }
+
+            .panier-item-remove {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+
+            .summary-title {
+                font-size: 18px;
+            }
+
+            .summary-row {
+                font-size: 14px;
+            }
+
+            .summary-row.total {
+                font-size: 16px;
+            }
+
+            .checkout-btn {
+                padding: 12px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-banner">
+        <i class="fas fa-truck"></i> Livraison GRATUITE à Niamey dès 20 000 FCFA ! 
+    </div>
+
+    <nav>
+        <div class="container">
+            <div class="logo">
+                <i class="fas fa-print"></i>
+                Al-Afna Business
+            </div>
+            <button class="menu-toggle" onclick="toggleMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <ul id="menu">
+                <li><a href="index.html" onclick="closeMenu()">Accueil</a></li>
+                <li><a href="boutique.html" onclick="closeMenu()">Boutique</a></li>
+                <li><a href="panier.html" onclick="closeMenu()"><i class="fas fa-shopping-cart"></i> Panier</a></li>
+                <li><a href="admin.html" onclick="closeMenu()"><i class="fas fa-lock"></i> Admin</a></li>
+                <li><a href="index.html#contact" onclick="closeMenu()">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="panier-header">
+        <h1><i class="fas fa-shopping-cart"></i> Mon Panier</h1>
+        <p>Vérifiez vos articles avant de passer commande</p>
+    </div>
+
+    <div class="panier-container">
+        <div class="panier-content">
+            <div class="panier-items" id="panierItems">
+                <div class="panier-empty">
+                    <i class="fas fa-shopping-cart"></i>
+                    <h3>Votre panier est vide</h3>
+                    <p>Découvrez nos produits</p>
+                    <a href="boutique.html" class="cta-button" style="display: inline-block; margin-top: 20px;">
+                        Continuer le shopping
+                    </a>
+                </div>
+            </div>
+
+            <div class="panier-summary" id="paniersummary" style="display: none;">
+                <div class="summary-title">Résumé</div>
+                <div class="summary-row">
+                    <label>Sous-total</label>
+                    <span id="subtotal">0 FCFA</span>
+                </div>
+                <div class="summary-row">
+                    <label>Livraison</label>
+                    <span id="shipping">Gratuite</span>
+                </div>
+                <div class="summary-row total">
+                    <label>Total</label>
+                    <span id="total">0 FCFA</span>
+                </div>
+                <button class="checkout-btn" onclick="checkout()">
+                    <i class="fas fa-check"></i> Valider la commande
+                </button>
+                <div class="continue-shopping">
+                    <a href="boutique.html">← Continuer le shopping</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 <span class="footer-gold">Al-Afna Business</span> - Tous droits réservés</p>
+        <p>Sublimation Professionnelle de Qualité</p>
+    </footer>
+
+    <script src="products.js"></script>
+    <script src="shop.js"></script>
+    <script>
+        function displayCart() {
+            const cart = getCart();
+            const panierItems = document.getElementById('panierItems');
+            const paniersummary = document.getElementById('paniersummary');
+
+            if (cart.length === 0) {
+                panierItems.innerHTML = `
+                    <div class="panier-empty">
+                        <i class="fas fa-shopping-cart"></i>
+                        <h3>Votre panier est vide</h3>
+                        <p>Découvrez nos produits</p>
+                        <a href="boutique.html" class="cta-button" style="display: inline-block; margin-top: 20px;">
+                            Continuer le shopping
+                        </a>
+                    </div>
+                `;
+                paniersummary.style.display = 'none';
+                return;
+            }
+
+            paniersummary.style.display = 'block';
+
+            panierItems.innerHTML = cart.map((item, index) => `
+                <div class="panier-item">
+                    <div class="panier-item-image">
+                        <img src="${item.image}" alt="${item.name}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22><rect fill=%22%23ddd%22/></svg>'">
+                    </div>
+                    <div class="panier-item-details">
+                        <div class="panier-item-name">${item.name}</div>
+                        <div class="panier-item-color">Couleur: <strong>${item.color}</strong></div>
+                        <div class="qty-control">
+                            <button onclick="updateQuantity(${index}, ${item.quantity - 1})">-</button>
+                            <input type="number" value="${item.quantity}" readonly>
+                            <button onclick="updateQuantity(${index}, ${item.quantity + 1})">+</button>
+                        </div>
+                    </div>
+                    <div class="panier-item-price">
+                        ${(item.price * item.quantity).toLocaleString()} FCFA
+                    </div>
+                    <button class="panier-item-remove" onclick="deleteFromCart(${index})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+
+            updateSummary();
+        }
+
+        function updateQuantity(index, newQty) {
+            if (newQty <= 0) {
+                deleteFromCart(index);
+                return;
+            }
+            const cart = getCart();
+            cart[index].quantity = newQty;
+            localStorage.setItem('afnaCart', JSON.stringify(cart));
+            displayCart();
+        }
+
+        function deleteFromCart(index) {
+            const cart = getCart();
+            cart.splice(index, 1);
+            localStorage.setItem('afnaCart', JSON.stringify(cart));
+            displayCart();
+        }
+
+        function updateSummary() {
+            const total = getCartTotal();
+            document.getElementById('subtotal').textContent = total.toLocaleString() + ' FCFA';
+            document.getElementById('total').textContent = total.toLocaleString() + ' FCFA';
+        }
+
+        function checkout() {
+            const cart = getCart();
+            if (cart.length === 0) {
+                alert('Votre panier est vide');
+                return;
+            }
+            
+            // Rediriger vers la page de commande
+            window.location.href = 'commander.html';
+        }
+
+        displayCart();
+    </script>
+</body>
+</html>
