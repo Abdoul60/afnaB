@@ -520,6 +520,9 @@
         </div>
     </div>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="products.js"></script>
     <script src="shop.js"></script>
     <script>
@@ -540,7 +543,12 @@ function handleLogin(e) {
         localStorage.setItem('adminLogged', 'true');
         document.getElementById('loginPage').style.display = 'none';
         document.getElementById('dashboardPage').style.display = 'block';
-        loadDashboard();
+        // S'assurer que les produits sont chargés avant d'afficher le dashboard
+        if (typeof loadProducts === 'function') {
+            loadProducts().then(() => loadDashboard());
+        } else {
+            loadDashboard();
+        }
     } else {
         alert('❌ Mot de passe incorrect');
     }
@@ -697,7 +705,13 @@ function handleAddProduct(e) {
     currentColors = [];
     removeImage();
     updateColorsList();
-    loadDashboard();
+    
+    // Rafraîchir le tableau en rechargeant les produits pour garantir la synchro
+    if (typeof loadProducts === 'function') {
+        loadProducts().then(() => loadDashboard());
+    } else {
+        loadDashboard();
+    }
 }
 
 function displayProducts() {
@@ -758,7 +772,7 @@ function editProduct(id) {
 
     document.querySelector('.admin-section').scrollIntoView({ behavior: 'smooth' });
     
-    document.getElementById('productForm').onsubmit = function(e) {
+        document.getElementById('productForm').onsubmit = function(e) {
         e.preventDefault();
         updateProduct(id, {
             name: document.getElementById('productName').value,
@@ -775,7 +789,11 @@ function editProduct(id) {
         currentColors = [];
         removeImage();
         updateColorsList();
-        loadDashboard();
+        if (typeof loadProducts === 'function') {
+            loadProducts().then(() => loadDashboard());
+        } else {
+            loadDashboard();
+        }
     };
 }
 
@@ -783,7 +801,11 @@ function deleteProductConfirm(id) {
     if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
         deleteProduct(id);
         alert('✅ Produit supprimé !');
-        loadDashboard();
+        if (typeof loadProducts === 'function') {
+            loadProducts().then(() => loadDashboard());
+        } else {
+            loadDashboard();
+        }
     }
 }
 
@@ -791,7 +813,11 @@ function deleteProductConfirm(id) {
 if (localStorage.getItem('adminLogged') === 'true') {
     document.getElementById('loginPage').style.display = 'none';
     document.getElementById('dashboardPage').style.display = 'block';
-    loadDashboard();
+    if (typeof loadProducts === 'function') {
+        loadProducts().then(() => loadDashboard());
+    } else {
+        loadDashboard();
+    }
 }
     </script>
 </body>
