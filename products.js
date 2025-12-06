@@ -1,162 +1,179 @@
-// Base de données des produits
-let products = [
-    {
-        id: 1,
-        name: "Montre Personnalisée",
-        category: "montres",
-        price: 15000,
-        image: "images/montre1.jpg",
-        description: "Montre élégante avec gravure personnalisée",
-        colors: ["Noir", "Or", "Argent"],
-        inStock: true
-    },
-    {
-        id: 2,
-        name: "Lunettes de Soleil",
-        category: "lunettes",
-        price: 12000,
-        image: "images/lunettes1.jpg",
-        description: "Lunettes tendance avec verres teintés",
-        colors: ["Noir", "Marron"],
-        inStock: true
-    },
-    {
-        id: 3,
-        name: "Montre Sportive",
-        category: "montres",
-        price: 18000,
-        image: "images/montre2.jpg",
-        description: "Montre résistante à l'eau pour le sport",
-        colors: ["Bleu", "Noir"],
-        inStock: true
-    },
-    {
-        id: 4,
-        name: "Lunettes Optiques",
-        category: "lunettes",
-        price: 20000,
-        image: "images/lunettes2.jpg",
-        description: "Lunettes optiques avec verres progressifs",
-        colors: ["Noir", "Marron", "Doré"],
-        inStock: true
-    },
-    {
-        id: 5,
-        name: "Montre Luxe",
-        category: "montres",
-        price: 35000,
-        image: "images/montre3.jpg",
-        description: "Montre de luxe avec bracelet cuir véritable",
-        colors: ["Noir", "Marron"],
-        inStock: true
-    },
-    {
-        id: 6,
-        name: "Lunettes Vintage",
-        category: "lunettes",
-        price: 14000,
-        image: "images/lunettes3.jpg",
-        description: "Lunettes rétro style vintage",
-        colors: ["Or", "Argent", "Rose"],
-        inStock: true
-    },
-    {
-        id: 7,
-        name: "Montre Digitale",
-        category: "montres",
-        price: 8000,
-        image: "images/montre4.jpg",
-        description: "Montre digitale avec affichage LED",
-        colors: ["Noir", "Blanc"],
-        inStock: true
-    },
-    {
-        id: 8,
-        name: "Lunettes Polarisées",
-        category: "lunettes",
-        price: 16000,
-        image: "images/lunettes4.jpg",
-        description: "Lunettes polarisées anti-reflet",
-        colors: ["Noir", "Bleu"],
-        inStock: false
-    }
-];
+const firebaseConfig = {
+  apiKey: "AIzaSyBlt2ngIUtgScbcBtZ4pa6Y_Rs5aR0dxNk",
+  authDomain: "al-afna-business.firebaseapp.com",
+  databaseURL: "https://al-afna-business-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "al-afna-business",
+  storageBucket: "al-afna-business.firebasestorage.app",
+  messagingSenderId: "876445206862",
+  appId: "1:876445206862:web:7e79ed63f40425d6c7b61f"
+};
 
-// Charger les produits depuis localStorage
-function loadProducts() {
-    const stored = localStorage.getItem('afnaProducts');
-    if (stored) {
-        products = JSON.parse(stored);
-    } else {
-        saveProducts();
-    }
-    return products;
+// Initialiser Firebase
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
 }
 
-// Sauvegarder les produits
+const database = firebase.database();
+let products = [];
+
+// ========== CHARGEMENT DES PRODUITS ==========
+
+// Charger les produits depuis Firebase
+function loadProducts() {
+    return new Promise((resolve) => {
+        database.ref('products').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                // Convertir l'objet Firebase en tableau en préservant la clé si "id" absent
+                products = Object.entries(data).map(([key, val]) => {
+                    const idFromVal = val && val.id !== undefined ? val.id : undefined;
+                    const id = idFromVal !== undefined
+                        ? (typeof idFromVal === 'string' ? parseInt(idFromVal, 10) : idFromVal)
+                        : (isNaN(parseInt(key, 10)) ? key : parseInt(key, 10));
+
+                    return {
+                        // garantir que les champs essentiels existent
+                        id: id,
+                        name: val.name || 'Produit',
+                        category: val.category || 'autre',
+                        price: val.price !== undefined ? val.price : 0,
+                        image: val.image || 'images/placeholder.png',
+                        description: val.description || '',
+                        colors: Array.isArray(val.colors) ? val.colors : (val.colors ? [val.colors] : ['Noir']),
+                        inStock: val.inStock !== undefined ? !!val.inStock : true,
+                        ...val
+                    };
+                });
+                // Trier par id pour un affichage stable (si id numérique)
+                products.sort((a, b) => {
+                    const ai = typeof a.id === 'number' ? a.id : parseInt(a.id, 10) || 0;
+                    const bi = typeof b.id === 'number' ? b.id : parseInt(b.id, 10) || 0;
+                    return ai - bi;
+                });
+                // Si des fonctions d'affichage existent, les appeler pour forcer la mise à jour
+                if (typeof displayProducts === 'function') {
+                    try { displayProducts(products); } catch (e) { console.warn('displayProducts error', e); }
+                }
+                if (typeof getFeaturedProducts === 'function') {
+                    try { /* nothing - page peut appeler getFeaturedProducts() */ } catch (e) {}
+                }
+            } else {
+                // Produits par défaut si la base est vide
+                products = [
+                    {
+                        id: 1,
+                        name: "Montre Personnalisée",
+                        category: "montres",
+                        price: 15000,
+                        image: "images/montre1.jpg",
+                        description: "Montre élégante avec gravure personnalisée",
+                        colors: ["Noir", "Or", "Argent"],
+                        inStock: true
+                    },
+                    {
+                        id: 2,
+                        name: "Lunettes de Soleil",
+                        category: "lunettes",
+                        price: 12000,
+                        image: "images/lunettes1.jpg",
+                        description: "Lunettes tendance avec verres teintés",
+                        colors: ["Noir", "Marron"],
+                        inStock: true
+                    }
+                ];
+                saveProducts();
+            }
+            resolve(products);
+        });
+    });
+}
+
+// Sauvegarder tous les produits
 function saveProducts() {
-    localStorage.setItem('afnaProducts', JSON.stringify(products));
+    const productsObj = {};
+    products.forEach(product => {
+        productsObj[product.id] = product;
+    });
+    database.ref('products').set(productsObj);
 }
 
 // Initialiser au chargement
 loadProducts();
 
-// Fonction pour récupérer tous les produits
+// ========== FONCTIONS PRODUITS ==========
+
 function getAllProducts() {
     return products;
 }
 
-// Fonction pour récupérer les 4 premiers produits
 function getFeaturedProducts() {
     return products.slice(0, 4);
 }
 
-// Fonction pour récupérer un produit par ID
 function getProductById(id) {
     return products.find(product => product.id === id);
 }
 
-// Fonction pour ajouter un nouveau produit
 function addProduct(newProduct) {
-    const newId = Math.max(...products.map(p => p.id), 0) + 1;
+    const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
     const product = {
         id: newId,
         ...newProduct
     };
-    products.push(product);
-    saveProducts();
-    console.log("Produit ajouté :", product);
+    
+    // Ajouter à Firebase
+    database.ref(`products/${newId}`).set(product).then(() => {
+        console.log("Produit ajouté et synchronisé :", product);
+        // Ajouter au tableau local immédiatement
+        products.push(product);
+        // Déclencher une mise à jour du DOM si disponible
+        if (typeof displayProducts === 'function') {
+            displayProducts(products);
+        }
+    });
+    
     return product;
 }
 
-// Fonction pour mettre à jour un produit
 function updateProduct(id, updatedData) {
-    const index = products.findIndex(p => p.id === id);
-    if (index !== -1) {
-        products[index] = { ...products[index], ...updatedData };
-        saveProducts();
-        return products[index];
-    }
-    return null;
+    const product = { id, ...updatedData };
+    
+    // Mettre à jour dans Firebase
+    database.ref(`products/${id}`).update(updatedData).then(() => {
+        // Mettre à jour le tableau local
+        const index = products.findIndex(p => p.id === id);
+        if (index !== -1) {
+            products[index] = { ...products[index], ...updatedData };
+        }
+        // Rafraîchir l'affichage
+        if (typeof displayProducts === 'function') {
+            displayProducts(products);
+        }
+        console.log("Produit mis à jour :", product);
+    });
+    
+    return product;
 }
 
-// Fonction pour supprimer un produit
 function deleteProduct(id) {
-    const index = products.findIndex(p => p.id === id);
-    if (index !== -1) {
-        products.splice(index, 1);
-        saveProducts();
-        return true;
-    }
-    return false;
+    // Supprimer de Firebase
+    database.ref(`products/${id}`).remove().then(() => {
+        // Supprimer du tableau local
+        products = products.filter(p => p.id !== id);
+        // Rafraîchir l'affichage
+        if (typeof displayProducts === 'function') {
+            displayProducts(products);
+        }
+        console.log("Produit supprimé (ID: " + id + ")");
+    });
+    
+    return true;
 }
 
-// Fonction pour filtrer par catégorie
 function getProductsByCategory(category) {
     return products.filter(product => product.category === category);
 }
 
-// Fonction pour chercher un produit
 function searchProducts(keyword) {
     return products.filter(product =>
         product.name.toLowerCase().includes(keyword.toLowerCase()) ||
@@ -164,15 +181,13 @@ function searchProducts(keyword) {
     );
 }
 
-// ========== GESTION DU PANIER ==========
+// ========== GESTION DU PANIER (reste en localStorage pour chaque utilisateur) ==========
 
-// Récupérer le panier
 function getCart() {
     const cart = localStorage.getItem('afnaCart');
     return cart ? JSON.parse(cart) : [];
 }
 
-// Ajouter au panier
 function addToCart(productId, quantity = 1, color = 'Noir') {
     const product = getProductById(productId);
     if (!product) return false;
@@ -197,25 +212,21 @@ function addToCart(productId, quantity = 1, color = 'Noir') {
     return true;
 }
 
-// Supprimer du panier
 function removeFromCart(productId, color = 'Noir') {
     let cart = getCart();
     cart = cart.filter(item => !(item.id === productId && item.color === color));
     localStorage.setItem('afnaCart', JSON.stringify(cart));
 }
 
-// Vider le panier
 function clearCart() {
     localStorage.removeItem('afnaCart');
 }
 
-// Calculer le total
 function getCartTotal() {
     const cart = getCart();
     return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
 }
 
-// Obtenir le nombre d'articles
 function getCartCount() {
     const cart = getCart();
     return cart.reduce((count, item) => count + item.quantity, 0);
