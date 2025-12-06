@@ -1,7 +1,10 @@
 let currentFilter = 'all';
 
 document.addEventListener('DOMContentLoaded', function() {
-    displayProducts(products);
+    // Attendre que Firebase charge les produits
+    loadProducts().then(() => {
+        displayProducts(products);
+    });
 });
 
 function displayProducts(productsToDisplay) {
