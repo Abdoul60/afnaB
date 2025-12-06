@@ -260,48 +260,53 @@
         </p>
     </footer>
 
-    <script src="boutique.js"></script>
-    <script src="shop.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="products.js"></script>
-
+    <script src="shop.js"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Vérifier que products.js est bien chargé
-        if (typeof getFeaturedProducts === 'undefined') {
-            console.error('products.js non chargé');
-            return;
-        }
+        // Charger d'abord les produits depuis Firebase
+        if (typeof loadProducts !== 'undefined') {
+            loadProducts().then(() => {
+                if (typeof getFeaturedProducts === 'undefined') {
+                    console.error('products.js non chargé');
+                    return;
+                }
 
-        const boutiqueMini = document.getElementById('boutiqueMini');
-        const featured = getFeaturedProducts();
+                const boutiqueMini = document.getElementById('boutiqueMini');
+                const featured = getFeaturedProducts();
 
-        // Afficher les 4 produits phares
-        boutiqueMini.innerHTML = featured.map(product => `
-            <div class="product-card-home">
-                <div style="position: relative;">
-                    <img src="${product.image}" 
-                         alt="${product.name}"
-                         loading="lazy"
-                         onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22250%22 height=%22250%22><rect fill=%22%23f0f0f0%22/><text x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22 font-size=%2214%22>Image non disponible</text></svg>'">
-                    <span class="stock-badge-home ${!product.inStock ? 'out' : ''}">
-                        ${product.inStock ? '✓ En Stock' : '✗ Rupture'}
-                    </span>
-                </div>
-                <div class="product-card-info">
-                    <div class="product-card-category">${product.category}</div>
-                    <div class="product-card-name">${product.name}</div>
-                    <div class="product-card-desc">${product.description}</div>
-                    <div class="product-card-price">${product.price.toLocaleString()} FCFA</div>
-                    <div class="product-card-actions">
-                        <button class="btn-cart btn-cart-full ${!product.inStock ? 'disabled' : ''}" 
-                                onclick="addToCartHome(${product.id})"
-                                ${!product.inStock ? 'disabled' : ''}>
-                            <i class="fas fa-shopping-cart"></i> Ajouter au Panier
-                        </button>
+                // Afficher les 4 produits phares
+                boutiqueMini.innerHTML = featured.map(product => `
+                    <div class="product-card-home">
+                        <div style="position: relative;">
+                            <img src="${product.image}" 
+                                 alt="${product.name}"
+                                 loading="lazy"
+                                 onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22250%22 height=%22250%22><rect fill=%22%23f0f0f0%22/><text x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22 font-size=%2214%22>Image non disponible</text></svg>'">
+                            <span class="stock-badge-home ${!product.inStock ? 'out' : ''}">
+                                ${product.inStock ? '✓ En Stock' : '✗ Rupture'}
+                            </span>
+                        </div>
+                        <div class="product-card-info">
+                            <div class="product-card-category">${product.category}</div>
+                            <div class="product-card-name">${product.name}</div>
+                            <div class="product-card-desc">${product.description}</div>
+                            <div class="product-card-price">${product.price.toLocaleString()} FCFA</div>
+                            <div class="product-card-actions">
+                                <button class="btn-cart btn-cart-full ${!product.inStock ? 'disabled' : ''}" 
+                                        onclick="addToCartHome(${product.id})"
+                                        ${!product.inStock ? 'disabled' : ''}>
+                                    <i class="fas fa-shopping-cart"></i> Ajouter au Panier
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-        `).join('');
+                `).join('');
+            });
+        }
     });
 
     function addToCartHome(productId) {
@@ -321,6 +326,5 @@
         }
     }
     </script>
-
 </body>
 </html>
